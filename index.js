@@ -14,16 +14,19 @@ const createDefaultData = require("./createDefaultData")
 const port = process.env.PORT
 const app = express()
 
+app.use(cors({
+  credentials: true,
+  origin: [process.env.CLIENT_URL, 'http://127.0.0.1:7000'],
+}))
 app.use(express.json())
 app.use(cookieParser())
 app.use(express.urlencoded({
-    extended: true,
-}))
-app.use(cors({
-    credentials: true,
-    origin: process.env.CLIENT_URL,
+  extended: true,
 }))
 
+app.get('/', (req, res) => {
+  res.sendFile(__dirname + '/postman/index.html')
+})
 app.use('/api', router)
 app.use(error)
 

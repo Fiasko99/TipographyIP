@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Postman Typography</title>
+</head>
+<body>
+  <button onclick="main()">Запуск</button>
+  <div id="app"></div>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script>
+    function uuid() {
+      return 'xxxxxxxxxxxx4xxxyxxxxxxxxxxxxxxx'
+        .replace(/[xy]/g, function(c) {
+          let r = Math.random() * 16 | 0
+          let v = c == 'x' ? r : c;
+          return v.toString(16);
+      });
+    }
+
+    const token = ''
+    const fetcher = axios.create({
+      withCredentials: true,
+      baseURL: 'http://localhost:7000/api'
+    })
+    const app = document.getElementById('app')
+
+    async function reg(user) {
+      const div = document.createElement('div')
+      const h1 = document.createElement('h1')
+      h1.textContent = 'Регистрация пользователя'
+      div.appendChild(h1)
+
+      const pre = document.createElement('pre')
+      pre.textContent = 'Ответ:\n'
+
+      await fetcher.post('/user/signup', user)
+      .then(( {data} ) => {
+        fetcher.defaults.headers.common['Authorization'] = `Bearer ${data.accessToken}`
+        pre.textContent += JSON.stringify(data).replace(/{/gm, '$&\n').replace(/}/gm, '\n$&').replace(/,/gm, '$&\n')
+      })
+      .catch(err => {
+        pre.textContent += err.message
+      })
+      .finally(() => {
+        div.appendChild(pre)
+        app.appendChild(div)
+      })
+    }
+
+    async function auth(user) {
+      const div = document.createElement('div')
+      const h1 = document.createElement('h1')
+      h1.textContent = 'Авторизация пользователя'
+      div.appendChild(h1)
+
+      const pre = document.createElement('pre')
+      pre.textContent = 'Ответ:\n'
+
+      await fetcher.post('/user/signin', user)
+      .then(( {data} ) => {
+        fetcher.defaults.headers.common['Authorization'] = `Bearer ${data.accessToken}`
+        pre.textContent += JSON.stringify(data).replace(/{/gm, '$&\n').replace(/}/gm, '\n$&').replace(/,/gm, '$&\n')
+      })
+      .catch(err => {
+        pre.textContent += err.message
+      })
+      .finally(() => {
+        div.appendChild(pre)
+        app.appendChild(div)
+      })
+    }
+
+    async function checkBase(userLogin) {
+      const routes = [
+        'categories',
+        'characteristics',
+        'characteristicsValues',
+        'products',
+        'productsCharacteristics',
+        'offers',
+        'offersCharacteristicsValues',
+      ]
+      const dataByRoute = {
+        categories: {
+          name: uuid()
+        },
+        characteristics: {
+          name: uuid()
+        },
+        characteristicsValues: {
+          strValue: uuid(),
+          characteristicId: 1,
+        },
+        offers: {
+          quantity: 100,
+          productId: 1,
+          userLogin,
+        },
+        offersCharacteristicsValues: {
+          characteristicValueId: 1,
+          offerId: 1,
+        },
+        products: {
+          name: uuid(),
+          categoryId: 1,
+        },
+        productsCharacteristics: {
+          productId: 1,
+          characteristicId: 1,
+        },
+      }
+      for (const route of routes) {
+        for (const type of ['post', 'get']) {
+          const div = document.createElement('div')
+          const h1 = document.createElement('h1')
+          h1.textContent = `Ручка ${route}/${type}`
+          div.appendChild(h1)
+
+          const pre = document.createElement('pre')
+          pre.textContent = 'Ответ:\n'
+
+          if (type === 'post') {
+            await fetcher.post(`/${route}/create`, dataByRoute[route])
+            .then(( {data} ) => {
+              pre.textContent += JSON.stringify(data).replace(/{/gm, '$&\n').replace(/}/gm, '\n$&').replace(/,/gm, '$&\n')
+            })
+            .catch(err => {
+              pre.textContent += err.message
+            })
+            .finally(() => {
+              div.appendChild(pre)
+              app.appendChild(div)
+            })
+          } else {
+            await fetcher.get(`/${route}/1`)
+            .then(( {data} ) => {
+              pre.textContent += JSON.stringify(data).replace(/{/gm, '$&\n').replace(/}/gm, '\n$&').replace(/,/gm, '$&\n')
+            })
+            .catch(err => {
+              pre.textContent += err.message
+            })
+            .finally(() => {
+              div.appendChild(pre)
+              app.appendChild(div)
+            })
+          }
+        }
+      }
+      for (const route of routes) {
+        const div = document.createElement('div')
+        const h1 = document.createElement('h1')
+        h1.textContent = `Ручка ${route}/getAll`
+        div.appendChild(h1)
+
+        const pre = document.createElement('pre')
+        pre.textContent = 'Ответ:\n'
+
+        await fetcher.get(`/${route}/getAll`)
+        .then(( {data} ) => {
+          pre.textContent += JSON.stringify(data).replace(/{/gm, '$&\n').replace(/}/gm, '\n$&').replace(/,/gm, '$&\n')
+        })
+        .catch(err => {
+          pre.textContent += err.message
+        })
+        .finally(() => {
+          div.appendChild(pre)
+          app.appendChild(div)
+        })
+      }
+    }
+
+    async function main() {
+      app.textContent = ''
+      const user = {
+        firstname: 'User1q',
+        name: 'User1q',
+        login: uuid(),
+        password: 'user1q',
+        email: uuid() + 'q@mail.ru',
+        phone: uuid()
+      }
+      await reg(user)
+      await auth({login: user.login, password: user.password})
+      await checkBase(user.login)
+    }
+  </script>
+</body>
+</html>

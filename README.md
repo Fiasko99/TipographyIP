@@ -3,11 +3,15 @@ Server for Typography shop, simple version
 
 ### For start dev version u need install db from [sequelize dialect list](https://sequelize.org/docs/v6/other-topics/dialect-specific-things/) in your machine and create .env.development.local file and paste all env keys below
 
-```npm run dev```
+```
+npm run dev
+```
 
 ### For start prod version u need install db from [sequelize dialect list](https://sequelize.org/docs/v6/other-topics/dialect-specific-things/) in your machine and field values in .env.development file
 
-```npm start```
+```
+npm start
+```
 
 |Env param|Desc value|
 |-|--------|
